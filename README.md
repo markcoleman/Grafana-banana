@@ -2,6 +2,8 @@
 
 A full-stack web application with .NET Web API backend and Angular frontend.
 
+> **🚀 [Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes!
+
 ## 🏗️ Project Structure
 
 ```
@@ -111,6 +113,19 @@ The CI pipeline:
 - ✅ Runs frontend tests
 
 ## 📝 Available Scripts
+
+### Using Makefile (Recommended)
+
+```bash
+make help           # Show all available commands
+make install        # Install all dependencies
+make build          # Build both backend and frontend
+make test           # Run all tests
+make lint           # Run linting
+make clean          # Clean build artifacts
+make run-backend    # Run the backend API
+make run-frontend   # Run the frontend app
+```
 
 ### Backend
 
