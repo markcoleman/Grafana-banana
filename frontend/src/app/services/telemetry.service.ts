@@ -24,10 +24,13 @@ export class TelemetryService {
       const { ZoneContextManager } = await import('@opentelemetry/context-zone');
 
       // Create a resource describing this service
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const Resource = (ResourcesModule as any).Resource;
       const resource = Resource.default().merge(
         new Resource({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           [(SemConvModule as any).SEMRESATTRS_SERVICE_NAME]: 'grafana-banana-frontend',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           [(SemConvModule as any).SEMRESATTRS_SERVICE_VERSION]: '1.0.0',
           'deployment.environment': 'development',
         })
@@ -79,12 +82,12 @@ export class TelemetryService {
   }
 
   // Method to track custom events
-  public trackEvent(eventName: string, properties?: Record<string, any>): void {
+  public trackEvent(eventName: string, properties?: Record<string, unknown>): void {
     console.log('Track event:', eventName, properties);
   }
 
   // Method to track errors
-  public trackError(error: Error, context?: Record<string, any>): void {
+  public trackError(error: Error, context?: Record<string, unknown>): void {
     console.error('Track error:', error, context);
   }
 }

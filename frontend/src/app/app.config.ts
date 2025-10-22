@@ -6,7 +6,8 @@ import { TelemetryService } from './services/telemetry.service';
 import { routes } from './app.routes';
 
 // Factory function to initialize telemetry
-export function initializeTelemetry(telemetryService: TelemetryService) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function initializeTelemetry(_telemetryService: TelemetryService) {
   return () => {
     // Telemetry is initialized in the service constructor
     console.log('Telemetry service initialized');
