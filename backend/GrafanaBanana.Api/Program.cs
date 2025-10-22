@@ -4,13 +4,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Add CORS support for Angular frontend
+// Add CORS support for Angular frontend and general access
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "http://localhost:5000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+
+    // Add a more permissive policy for development
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -24,8 +33,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// Enable CORS
-app.UseCors("AllowAngularApp");
+// Enable CORS with more permissive policy for development
+app.UseCors("AllowAll");
 
 var summaries = new[]
 {
@@ -34,7 +43,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
