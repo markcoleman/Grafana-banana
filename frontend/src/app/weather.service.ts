@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface WeatherForecast {
   date: string;
@@ -13,9 +14,8 @@ export interface WeatherForecast {
   providedIn: 'root'
 })
 export class WeatherService {
-  private apiUrl = 'http://localhost:5000';
-
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl;
 
   getWeatherForecast(): Observable<WeatherForecast[]> {
     return this.http.get<WeatherForecast[]>(`${this.apiUrl}/weatherforecast`);

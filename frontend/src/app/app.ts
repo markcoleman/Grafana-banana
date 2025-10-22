@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WeatherService, WeatherForecast } from './weather.service';
@@ -10,12 +10,12 @@ import { WeatherService, WeatherForecast } from './weather.service';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+  private weatherService = inject(WeatherService);
+  
   protected readonly title = signal('Grafana-banana');
   protected weatherData = signal<WeatherForecast[]>([]);
   protected loading = signal(false);
   protected error = signal<string | null>(null);
-
-  constructor(private weatherService: WeatherService) {}
 
   ngOnInit() {
     this.loadWeatherData();
