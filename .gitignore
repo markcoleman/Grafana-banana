@@ -73,3 +73,5 @@ out-tsc/
 # OS
 .DS_Store
 Thumbs.db
+# Observability logs
+backend/GrafanaBanana.Api/logs/

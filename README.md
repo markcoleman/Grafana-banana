@@ -1,19 +1,74 @@
 # Grafana-banana
 
-A full-stack web application with .NET Web API backend and Angular frontend.
+A full-stack web application with .NET Web API backend and Angular frontend, featuring comprehensive observability with Grafana, Prometheus, Tempo, and Loki.
 
 > **🚀 [Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes!
+> 
+> **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
 
 ## 🏗️ Project Structure
 
 ```
 Grafana-banana/
 ├── backend/
-│   └── GrafanaBanana.Api/          # .NET 9 Web API
-├── frontend/                        # Angular application
+│   └── GrafanaBanana.Api/          # .NET 9 Web API with OpenTelemetry
+├── frontend/                        # Angular application with web tracing
+├── observability/                   # Complete Grafana stack configuration
+│   ├── grafana/                    # Grafana dashboards and provisioning
+│   ├── prometheus/                 # Metrics collection config
+│   ├── tempo/                      # Distributed tracing config
+│   ├── loki/                       # Log aggregation config
+│   └── promtail/                   # Log shipper config
 ├── .devcontainer/                   # Dev container configuration
 └── .github/workflows/               # GitHub Actions CI/CD
 ```
+
+## ⭐ Key Features
+
+### 🔍 Comprehensive Observability
+
+- **Distributed Tracing** with OpenTelemetry and Tempo
+- **Metrics Collection** with Prometheus
+- **Log Aggregation** with Loki and Promtail
+- **Unified Dashboards** in Grafana
+- **Full-Stack Monitoring** (Backend + Frontend)
+
+### 📊 Monitoring Capabilities
+
+#### Backend (.NET)
+- ✅ OpenTelemetry instrumentation for ASP.NET Core
+- ✅ Custom business metrics (counters, histograms, gauges)
+- ✅ Structured logging with Serilog
+- ✅ Health check endpoints
+- ✅ Prometheus metrics endpoint (`/metrics`)
+- ✅ Runtime and performance metrics
+
+#### Frontend (Angular)
+- ✅ OpenTelemetry browser instrumentation
+- ✅ Automatic page load tracking
+- ✅ User interaction tracking
+- ✅ HTTP request tracing
+- ✅ Error tracking
+
+### 🎯 Available Endpoints
+
+- **API**: http://localhost:5000
+- **Frontend**: http://localhost:4200
+- **Grafana**: http://localhost:3000 (admin/admin)
+- **Prometheus**: http://localhost:9090
+- **Tempo**: http://localhost:3200
+- **Loki**: http://localhost:3100
+
+#### API Endpoints
+
+- `GET /weatherforecast` - Weather forecast data with full tracing
+- `GET /metrics` - Prometheus metrics endpoint
+- `GET /health` - Detailed health check
+- `GET /health/ready` - Readiness probe
+- `GET /health/live` - Liveness probe
+- `GET /api/metrics/custom` - Custom metrics info
+- `GET /api/trace/test` - Test distributed tracing
+- `GET /api/error/test` - Test error tracking
 
 ## 🚀 Getting Started
 
@@ -63,6 +118,29 @@ npm start
 ```
 
 The frontend will be available at `http://localhost:4200`
+
+#### Complete Stack with Docker Compose
+
+Start the entire application with the full observability stack:
+
+```bash
+# Start all services (app + monitoring stack)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+This starts:
+- Backend API (port 5000)
+- Frontend (port 4200)
+- Grafana (port 3000)
+- Prometheus (port 9090)
+- Tempo (port 3200)
+- Loki (port 3100)
 
 ## 🏗️ Building
 
@@ -146,16 +224,83 @@ make run-frontend   # Run the frontend app
 - .NET 9
 - ASP.NET Core Web API
 - Minimal APIs
+- OpenTelemetry for tracing and metrics
+- Serilog for structured logging
+- Prometheus exporter
 
 **Frontend:**
-- Angular 19
+- Angular 20
 - TypeScript
+- OpenTelemetry for browser tracing
 - CSS
+
+**Observability:**
+- Grafana - Visualization and dashboards
+- Prometheus - Metrics collection
+- Tempo - Distributed tracing
+- Loki - Log aggregation
+- Promtail - Log shipping
 
 **DevOps:**
 - GitHub Actions
 - Dev Containers
-- Docker
+- Docker & Docker Compose
+
+## 📊 Observability Features
+
+### Metrics
+
+The application exposes comprehensive metrics at `/metrics`:
+
+**Application Metrics:**
+- `api_requests_total` - Total API requests
+- `api_requests_active` - Active requests
+- `api_request_duration_ms` - Request duration histogram
+- `weather_forecast_requests` - Weather endpoint requests
+
+**Runtime Metrics:**
+- .NET memory usage
+- Garbage collection stats
+- Thread pool metrics
+- Exception counts
+- CPU usage
+
+### Distributed Tracing
+
+Full distributed tracing from frontend to backend:
+- Automatic HTTP request tracing
+- Custom span creation
+- Trace correlation across services
+- Exception tracking in traces
+
+### Structured Logging
+
+All logs include:
+- Timestamp and log level
+- Source context
+- Machine name and thread ID
+- Request correlation
+- Structured data for filtering
+
+### Pre-configured Dashboards
+
+Grafana dashboards are automatically provisioned with:
+- API request rate and latency
+- Memory and CPU usage
+- Active requests
+- Error rates
+- Real-time log streaming
+
+## 🔍 Monitoring Your Application
+
+1. **Start the stack**: `docker-compose up -d`
+2. **Open Grafana**: http://localhost:3000 (admin/admin)
+3. **View the dashboard**: Navigate to "Grafana-banana API Observability"
+4. **Generate some traffic**: Call the API endpoints
+5. **Explore traces**: Click on any metric to see related traces
+6. **View logs**: Check the logs panel for detailed application logs
+
+For detailed monitoring instructions, see [observability/README.md](observability/README.md)
 
 ## 📖 License
 
