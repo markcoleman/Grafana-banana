@@ -1,0 +1,42 @@
+{
+  "name": "Grafana-banana",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "angular.ng-template",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "GitHub.copilot"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[csharp]": {
+          "editor.defaultFormatter": "ms-dotnettools.csharp"
+        }
+      }
+    }
+  },
+  "forwardPorts": [5000, 4200],
+  "portsAttributes": {
+    "5000": {
+      "label": "API",
+      "onAutoForward": "notify"
+    },
+    "4200": {
+      "label": "Frontend",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "cd frontend && npm install",
+  "remoteUser": "vscode"
+}

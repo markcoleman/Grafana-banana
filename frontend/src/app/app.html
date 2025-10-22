@@ -1,0 +1,42 @@
+<div class="container">
+  <header>
+    <h1>{{ title() }}</h1>
+    <p>Full-stack application with .NET Web API and Angular</p>
+  </header>
+
+  <main>
+    <section class="weather-section">
+      <h2>Weather Forecast</h2>
+      <p class="description">This data is fetched from the .NET Web API running on http://localhost:5000</p>
+      
+      @if (loading()) {
+        <div class="loading">Loading weather data...</div>
+      }
+      
+      @if (error()) {
+        <div class="error">
+          <p>{{ error() }}</p>
+          <button (click)="loadWeatherData()">Retry</button>
+        </div>
+      }
+      
+      @if (!loading() && !error() && weatherData().length > 0) {
+        <div class="weather-grid">
+          @for (forecast of weatherData(); track forecast.date) {
+            <div class="weather-card">
+              <div class="date">{{ forecast.date }}</div>
+              <div class="temperature">{{ forecast.temperatureC }}°C / {{ forecast.temperatureF }}°F</div>
+              <div class="summary">{{ forecast.summary }}</div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with .NET 9 + Angular 19</p>
+  </footer>
+</div>
+
+<router-outlet />
