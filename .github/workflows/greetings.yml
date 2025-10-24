@@ -1,0 +1,39 @@
+name: Greetings
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            👋 Thanks for opening your first issue in Grafana-banana! 
+            
+            We appreciate your contribution and will review your issue soon. Please make sure you've provided all the necessary information to help us understand and address your concern.
+            
+            While you wait, feel free to:
+            - Check out our [Contributing Guidelines](https://github.com/markcoleman/Grafana-banana/blob/main/CONTRIBUTING.md)
+            - Review our [Quick Start Guide](https://github.com/markcoleman/Grafana-banana/blob/main/QUICKSTART.md)
+            - Explore our [Documentation](https://github.com/markcoleman/Grafana-banana/blob/main/README.md)
+          pr-message: |
+            🎉 Congratulations on your first pull request to Grafana-banana! 
+            
+            Thank you for contributing! We'll review your changes soon. Please ensure:
+            - Your code follows our coding standards
+            - All tests pass
+            - You've updated relevant documentation
+            
+            Check out our [Contributing Guidelines](https://github.com/markcoleman/Grafana-banana/blob/main/CONTRIBUTING.md) if you haven't already.
+            
+            We're excited to have you as part of our community! 🚀

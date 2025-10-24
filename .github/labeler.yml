@@ -1,0 +1,98 @@
+# Labeler configuration for automatic PR labeling
+# https://github.com/actions/labeler
+
+# Backend changes
+"backend":
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'backend/**/*'
+      - '**/*.cs'
+      - '**/*.csproj'
+
+# Frontend changes
+"frontend":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'frontend/**/*'
+      - '**/*.ts'
+      - '**/*.js'
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.scss'
+      - 'package.json'
+      - 'package-lock.json'
+
+# Angular specific
+"angular":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'frontend/src/**/*'
+      - 'frontend/angular.json'
+      - 'frontend/tsconfig*.json'
+
+# .NET specific
+"dotnet":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+
+# Documentation
+"documentation":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+# Observability
+"observability":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'observability/**/*'
+      - '**/appsettings*.json'
+
+# Infrastructure
+"infrastructure":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docker-compose.yml'
+      - '**/Dockerfile'
+      - '.dockerignore'
+      - '.devcontainer/**/*'
+
+# GitHub workflows
+"github-actions":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/actions/**/*'
+
+# Dependencies
+"dependencies":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+      - '**/*.csproj'
+      - '.github/dependabot.yml'
+
+# Configuration
+"configuration":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*config*.json'
+      - '**/*config*.yml'
+      - '**/*config*.yaml'
+      - '**/appsettings*.json'
+      - '.editorconfig'
+
+# Tests
+"tests":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*test*.cs'
+      - '**/*test*.ts'
+      - '**/*spec*.ts'
+      - '**/tests/**/*'
+      - '**/test/**/*'
