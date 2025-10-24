@@ -364,6 +364,8 @@ Visual documentation and screenshots of the application are available in the [do
 - [Backend Screenshots](docs/screenshots/backend/) - Web API documentation
 - [Observability Screenshots](docs/screenshots/observability/) - Grafana dashboards and monitoring
 
+Want to contribute screenshots? See the [Screenshots Contributing Guide](docs/CONTRIBUTING_SCREENSHOTS.md)!
+
 ## 📖 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
