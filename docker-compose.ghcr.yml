@@ -1,0 +1,146 @@
+# Docker Compose configuration using pre-built images from GitHub Container Registry
+# This file is useful for running the application using released container images
+# instead of building from source.
+#
+# Usage:
+#   docker-compose -f docker-compose.ghcr.yml up -d
+#
+# To use a specific version instead of 'latest':
+#   1. Edit the image tags below (e.g., change :latest to :0.1.0)
+#   2. Run: docker-compose -f docker-compose.ghcr.yml up -d
+#
+# Note about log collection:
+# - Backend logs are written to /app/logs inside the backend container
+# - A shared volume 'backend_logs' is mounted to both backend and promtail
+# - Promtail reads logs from this shared volume at /var/log/grafana-banana
+# - This ensures log aggregation works with pre-built containers
+
+services:
+  backend:
+    image: ghcr.io/markcoleman/grafana-banana/backend:latest
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - OpenTelemetry__Otlp__Endpoint=http://tempo:4317
+      # Serilog will write logs to /app/logs inside the container
+    volumes:
+      - backend_logs:/app/logs
+    networks:
+      - grafana-banana-network
+    depends_on:
+      - tempo
+      - loki
+
+  frontend:
+    image: ghcr.io/markcoleman/grafana-banana/frontend:latest
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://backend:8080
+    networks:
+      - grafana-banana-network
+
+  # Prometheus - Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - grafana-banana-network
+    restart: unless-stopped
+
+  # Tempo - Distributed tracing
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    ports:
+      - "3200:3200"   # Tempo HTTP
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "9411:9411"   # Zipkin
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    networks:
+      - grafana-banana-network
+    restart: unless-stopped
+
+  # Loki - Log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - grafana-banana-network
+    restart: unless-stopped
+
+  # Promtail - Log shipper for Loki
+  # Note: Promtail reads from a shared volume with the backend container
+  # The 'backend_logs' volume is mounted at /var/log/grafana-banana here
+  # to match the path expected by the promtail-config.yaml scrape configuration
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./observability/promtail/promtail-config.yaml:/etc/promtail/config.yml
+      - backend_logs:/var/log/grafana-banana:ro
+    networks:
+      - grafana-banana-network
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  # Grafana - Visualization and dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    networks:
+      - grafana-banana-network
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    restart: unless-stopped
+
+networks:
+  grafana-banana-network:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  tempo_data:
+  loki_data:
+  grafana_data:
+  backend_logs:

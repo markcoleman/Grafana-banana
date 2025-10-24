@@ -224,6 +224,17 @@ Grafana-banana/
 └── README.md
 ```
 
+## Contributing Screenshots
+
+We welcome visual documentation contributions! See the [Screenshots Contributing Guide](docs/CONTRIBUTING_SCREENSHOTS.md) for:
+
+- How to capture high-quality screenshots
+- Where to place different types of screenshots
+- File naming conventions
+- Optimization guidelines
+
+Screenshots help users understand the application better and are greatly appreciated!
+
 ## Need Help?
 
 - Check the [README.md](README.md) for general information

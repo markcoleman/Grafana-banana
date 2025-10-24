@@ -75,3 +75,10 @@ out-tsc/
 Thumbs.db
 # Observability logs
 backend/GrafanaBanana.Api/logs/
+
+# Screenshots - ignore image files but keep README.md files
+docs/screenshots/**/*.png
+docs/screenshots/**/*.jpg
+docs/screenshots/**/*.jpeg
+docs/screenshots/**/*.gif
+!docs/screenshots/**/README.md
