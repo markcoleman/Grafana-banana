@@ -96,7 +96,7 @@ This project uses:
 ## Additional Resources
 
 - [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
-- [.NET Security Best Practices](https://docs.microsoft.com/en-us/aspnet/core/security/)
+- [.NET Security Best Practices](https://learn.microsoft.com/en-us/aspnet/core/security/)
 - [Angular Security Guide](https://angular.io/guide/security)
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/)
 
