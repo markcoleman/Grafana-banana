@@ -1,110 +1,68 @@
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* Modern 2025 Component Styles with Advanced Animations */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-header {
-  text-align: center;
-  margin-bottom: 3rem;
+/* Custom scrollbar for modern look */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-header h1 {
-  color: #333;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
 }
 
-header p {
-  color: #666;
-  font-size: 1.1rem;
+::-webkit-scrollbar-thumb {
+  @apply bg-gradient-to-b from-blue-500 to-purple-500 rounded-full;
 }
 
-main {
-  margin-bottom: 3rem;
+::-webkit-scrollbar-thumb:hover {
+  @apply from-blue-600 to-purple-600;
 }
 
-.weather-section h2 {
-  color: #333;
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+/* Smooth transitions for all interactive elements */
+button, a, input, select, textarea {
+  @apply transition-all duration-300 ease-in-out;
 }
 
-.description {
-  color: #666;
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
+/* Focus styles for accessibility */
+button:focus-visible, a:focus-visible {
+  @apply outline-none ring-4 ring-blue-500/50 dark:ring-blue-400/50;
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 2rem;
-  background: #f5f5f5;
-  border-radius: 8px;
+/* Selection styling */
+::selection {
+  @apply bg-blue-500 text-white;
 }
 
-.error {
-  background: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
+/* Loading spinner enhancement */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.error button {
-  margin-top: 1rem;
-  padding: 0.5rem 1.5rem;
-  background: #c33;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
 
-.error button:hover {
-  background: #a22;
-}
-
-.weather-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.weather-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.weather-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.weather-card .date {
-  font-size: 0.9rem;
-  opacity: 0.9;
-  margin-bottom: 0.5rem;
-}
-
-.weather-card .temperature {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.weather-card .summary {
-  font-size: 1.1rem;
-  opacity: 0.95;
-}
-
-footer {
-  text-align: center;
-  padding: 2rem 0;
-  color: #666;
-  border-top: 1px solid #e0e0e0;
+/* Gradient text animation */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
