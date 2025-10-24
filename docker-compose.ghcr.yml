@@ -96,6 +96,8 @@ services:
 
   # Promtail - Log shipper for Loki
   # Note: Promtail reads from a shared volume with the backend container
+  # The 'backend_logs' volume is mounted at /var/log/grafana-banana here
+  # to match the path expected by the promtail-config.yaml scrape configuration
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
@@ -107,7 +109,6 @@ services:
       - grafana-banana-network
     depends_on:
       - loki
-      - backend
     restart: unless-stopped
 
   # Grafana - Visualization and dashboards
