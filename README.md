@@ -5,6 +5,10 @@ A full-stack web application with .NET Web API backend and Angular frontend, fea
 > **🚀 [Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes!
 > 
 > **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
+> 
+> **📸 [Screenshots](docs/screenshots/README.md)** - Visual documentation of the application
+> 
+> **📋 [Changelog](CHANGELOG.md)** - Release notes and version history
 
 ## 🏗️ Project Structure
 
@@ -245,6 +249,7 @@ make run-frontend   # Run the frontend app
 - GitHub Actions
 - Dev Containers
 - Docker & Docker Compose
+- GitHub Container Registry (GHCR)
 
 ## 📊 Observability Features
 
@@ -301,6 +306,63 @@ Grafana dashboards are automatically provisioned with:
 6. **View logs**: Check the logs panel for detailed application logs
 
 For detailed monitoring instructions, see [observability/README.md](observability/README.md)
+
+## 🐳 Docker Images
+
+Pre-built Docker images are available on GitHub Container Registry for each release:
+
+```bash
+# Pull backend image
+docker pull ghcr.io/markcoleman/grafana-banana/backend:latest
+
+# Pull frontend image
+docker pull ghcr.io/markcoleman/grafana-banana/frontend:latest
+
+# Or pull a specific version
+docker pull ghcr.io/markcoleman/grafana-banana/backend:0.1.0
+docker pull ghcr.io/markcoleman/grafana-banana/frontend:0.1.0
+```
+
+### Using Pre-built Images
+
+You can use the pre-built images with docker-compose by modifying the `docker-compose.yml`:
+
+```yaml
+services:
+  backend:
+    image: ghcr.io/markcoleman/grafana-banana/backend:latest
+    # Remove the 'build' section
+    
+  frontend:
+    image: ghcr.io/markcoleman/grafana-banana/frontend:latest
+    # Remove the 'build' section
+```
+
+## 📦 Releases
+
+Releases are managed through GitHub Releases. Each release:
+
+- Automatically builds and publishes Docker images to GHCR
+- Tags images with the version number and `latest`
+- Includes release notes documenting changes
+- See [CHANGELOG.md](CHANGELOG.md) for detailed version history
+
+To create a new release, create a new tag and push it:
+
+```bash
+git tag -a v0.1.0 -m "Release version 0.1.0"
+git push origin v0.1.0
+```
+
+Or create a release through the GitHub UI, which will trigger the automated container publishing workflow.
+
+## 📸 Screenshots
+
+Visual documentation and screenshots of the application are available in the [docs/screenshots](docs/screenshots/) directory:
+
+- [Frontend Screenshots](docs/screenshots/frontend/) - Angular application UI
+- [Backend Screenshots](docs/screenshots/backend/) - Web API documentation
+- [Observability Screenshots](docs/screenshots/observability/) - Grafana dashboards and monitoring
 
 ## 📖 License
 
