@@ -151,50 +151,53 @@ jobs:
           CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
         fi
         
-        # Escape special characters for GitHub output
-        CHANGELOG="${CHANGELOG//'%'/'%25'}"
-        CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-        CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-        
-        echo "changelog=${CHANGELOG}" >> $GITHUB_OUTPUT
+        # Save changelog to file for use in release
+        echo "$CHANGELOG" > /tmp/changelog.txt
+        echo "Changelog generated with $(echo "$CHANGELOG" | wc -l) entries"
     
     - name: Create Release
-      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ needs.determine-version.outputs.tag }}
-        release_name: Release ${{ needs.determine-version.outputs.tag }}
-        body: |
-          ## 🎉 Release ${{ needs.determine-version.outputs.tag }}
-          
-          ### Changes
-          ${{ steps.changelog.outputs.changelog }}
-          
-          ### Docker Images
-          
-          **Backend API:**
-          ```
-          ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
-          ghcr.io/${{ github.repository }}/backend:latest
-          ```
-          
-          **Frontend:**
-          ```
-          ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
-          ghcr.io/${{ github.repository }}/frontend:latest
-          ```
-          
-          ### Pull Images
-          ```bash
-          docker pull ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
-          docker pull ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
-          ```
-          
-          ### Run with Docker Compose
-          ```bash
-          # Update docker-compose.ghcr.yml to use version ${{ needs.determine-version.outputs.version }}
-          docker-compose -f docker-compose.ghcr.yml up -d
-          ```
-        draft: false
-        prerelease: false
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create release body
+        cat > /tmp/release_body.md << 'EOF'
+        ## 🎉 Release ${{ needs.determine-version.outputs.tag }}
+        
+        ### Changes
+        EOF
+        
+        cat /tmp/changelog.txt >> /tmp/release_body.md
+        
+        cat >> /tmp/release_body.md << 'EOF'
+        
+        ### Docker Images
+        
+        **Backend API:**
+        ```
+        ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
+        ghcr.io/${{ github.repository }}/backend:latest
+        ```
+        
+        **Frontend:**
+        ```
+        ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
+        ghcr.io/${{ github.repository }}/frontend:latest
+        ```
+        
+        ### Pull Images
+        ```bash
+        docker pull ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
+        docker pull ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
+        ```
+        
+        ### Run with Docker Compose
+        ```bash
+        # Update docker-compose.ghcr.yml to use version ${{ needs.determine-version.outputs.version }}
+        docker-compose -f docker-compose.ghcr.yml up -d
+        ```
+        EOF
+        
+        # Create the release using GitHub CLI
+        gh release create ${{ needs.determine-version.outputs.tag }} \
+          --title "Release ${{ needs.determine-version.outputs.tag }}" \
+          --notes-file /tmp/release_body.md
