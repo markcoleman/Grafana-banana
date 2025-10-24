@@ -8,6 +8,12 @@
 # To use a specific version instead of 'latest':
 #   1. Edit the image tags below (e.g., change :latest to :0.1.0)
 #   2. Run: docker-compose -f docker-compose.ghcr.yml up -d
+#
+# Note about log collection:
+# - Backend logs are written to /app/logs inside the backend container
+# - A shared volume 'backend_logs' is mounted to both backend and promtail
+# - Promtail reads logs from this shared volume at /var/log/grafana-banana
+# - This ensures log aggregation works with pre-built containers
 
 services:
   backend:
@@ -18,6 +24,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - OpenTelemetry__Otlp__Endpoint=http://tempo:4317
+      # Serilog will write logs to /app/logs inside the container
+    volumes:
+      - backend_logs:/app/logs
     networks:
       - grafana-banana-network
     depends_on:
@@ -86,17 +95,19 @@ services:
     restart: unless-stopped
 
   # Promtail - Log shipper for Loki
+  # Note: Promtail reads from a shared volume with the backend container
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./observability/promtail/promtail-config.yaml:/etc/promtail/config.yml
-      - promtail_logs:/var/log/grafana-banana
+      - backend_logs:/var/log/grafana-banana:ro
     networks:
       - grafana-banana-network
     depends_on:
       - loki
+      - backend
     restart: unless-stopped
 
   # Grafana - Visualization and dashboards
@@ -131,4 +142,4 @@ volumes:
   tempo_data:
   loki_data:
   grafana_data:
-  promtail_logs:
+  backend_logs:
