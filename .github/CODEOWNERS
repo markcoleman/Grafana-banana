@@ -1,0 +1,28 @@
+# CODEOWNERS file for Grafana-banana
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @markcoleman
+
+# Backend .NET code
+/backend/ @markcoleman
+
+# Frontend Angular code
+/frontend/ @markcoleman
+
+# Observability configuration
+/observability/ @markcoleman
+
+# Infrastructure and Docker
+docker-compose.yml @markcoleman
+/backend/GrafanaBanana.Api/Dockerfile @markcoleman
+/frontend/Dockerfile @markcoleman
+/.devcontainer/ @markcoleman
+
+# GitHub workflows and actions
+/.github/ @markcoleman
+
+# Documentation
+*.md @markcoleman
+/CONTRIBUTING.md @markcoleman
+/README.md @markcoleman
