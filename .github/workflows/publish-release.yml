@@ -1,0 +1,200 @@
+name: Publish Release on Push to Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # First job: determine the next version
+  determine-version:
+    name: Determine Next Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      tag: ${{ steps.semver.outputs.tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0  # Fetch all history for semantic versioning
+    
+    - name: Determine semantic version
+      id: semver
+      run: |
+        # Get the latest tag, default to v0.0.0 if no tags exist
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag: $LATEST_TAG"
+        
+        # Remove 'v' prefix for version calculation
+        LATEST_VERSION=${LATEST_TAG#v}
+        
+        # Split version into components
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+        
+        # Get commit messages since last tag
+        if [ "$LATEST_TAG" = "v0.0.0" ]; then
+          COMMITS=$(git log --pretty=format:"%s")
+        else
+          COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
+        fi
+        
+        echo "Commits since last tag:"
+        echo "$COMMITS"
+        
+        # Determine version bump based on conventional commits
+        # Check for breaking changes (MAJOR bump)
+        if echo "$COMMITS" | grep -qiE "^(feat|fix|docs|style|refactor|perf|test|chore)(\(.+\))?!:|BREAKING CHANGE:"; then
+          MAJOR=$((MAJOR + 1))
+          MINOR=0
+          PATCH=0
+          echo "Breaking change detected - bumping MAJOR version"
+        # Check for new features (MINOR bump)
+        elif echo "$COMMITS" | grep -qiE "^feat(\(.+\))?:"; then
+          MINOR=$((MINOR + 1))
+          PATCH=0
+          echo "Feature detected - bumping MINOR version"
+        # Default to PATCH bump
+        else
+          PATCH=$((PATCH + 1))
+          echo "No breaking changes or features - bumping PATCH version"
+        fi
+        
+        NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        NEW_TAG="v${NEW_VERSION}"
+        
+        echo "New version: $NEW_VERSION"
+        echo "New tag: $NEW_TAG"
+        
+        echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+        echo "tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+
+  # Second job: build and push containers
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: determine-version
+    outputs:
+      backend-digest: ${{ steps.backend-build.outputs.digest }}
+      frontend-digest: ${{ steps.frontend-build.outputs.digest }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push Backend API image
+      id: backend-build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/GrafanaBanana.Api
+        file: ./backend/GrafanaBanana.Api/Dockerfile
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
+          ghcr.io/${{ github.repository }}/backend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+    
+    - name: Build and push Frontend image
+      id: frontend-build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
+          ghcr.io/${{ github.repository }}/frontend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Third job: create GitHub release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [determine-version, build-and-push]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the latest tag
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        
+        # Generate changelog
+        if [ -z "$LATEST_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+        else
+          CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+        fi
+        
+        # Escape special characters for GitHub output
+        CHANGELOG="${CHANGELOG//'%'/'%25'}"
+        CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+        CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+        
+        echo "changelog=${CHANGELOG}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ needs.determine-version.outputs.tag }}
+        release_name: Release ${{ needs.determine-version.outputs.tag }}
+        body: |
+          ## 🎉 Release ${{ needs.determine-version.outputs.tag }}
+          
+          ### Changes
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ### Docker Images
+          
+          **Backend API:**
+          ```
+          ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
+          ghcr.io/${{ github.repository }}/backend:latest
+          ```
+          
+          **Frontend:**
+          ```
+          ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
+          ghcr.io/${{ github.repository }}/frontend:latest
+          ```
+          
+          ### Pull Images
+          ```bash
+          docker pull ghcr.io/${{ github.repository }}/backend:${{ needs.determine-version.outputs.version }}
+          docker pull ghcr.io/${{ github.repository }}/frontend:${{ needs.determine-version.outputs.version }}
+          ```
+          
+          ### Run with Docker Compose
+          ```bash
+          # Update docker-compose.ghcr.yml to use version ${{ needs.determine-version.outputs.version }}
+          docker-compose -f docker-compose.ghcr.yml up -d
+          ```
+        draft: false
+        prerelease: false

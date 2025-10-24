@@ -1,4 +1,11 @@
-name: Release and Publish Containers
+name: Manual Release and Publish Containers
+
+# This workflow handles manual releases via:
+# 1. Manual workflow dispatch with a specific version tag
+# 2. When a GitHub release is manually created
+# 3. When a tag matching v*.*.* is manually pushed
+#
+# For automatic releases on push to main, see publish-release.yml
 
 on:
   release:
