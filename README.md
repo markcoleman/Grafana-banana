@@ -325,7 +325,14 @@ docker pull ghcr.io/markcoleman/grafana-banana/frontend:0.1.0
 
 ### Using Pre-built Images
 
-You can use the pre-built images with docker-compose by modifying the `docker-compose.yml`:
+A pre-configured docker-compose file is available for using released images:
+
+```bash
+# Use pre-built images from GitHub Container Registry
+docker-compose -f docker-compose.ghcr.yml up -d
+```
+
+Or modify the main `docker-compose.yml` to use pre-built images:
 
 ```yaml
 services:
