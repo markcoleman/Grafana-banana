@@ -6,6 +6,8 @@ A full-stack web application with .NET Web API backend and Angular frontend, fea
 > 
 > **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
 > 
+> **🔄 [CI/CD Workflows](docs/CI_CD_WORKFLOWS.md)** - Automated releases and container publishing
+> 
 > **📸 [Screenshots](docs/screenshots/README.md)** - Visual documentation of the application
 > 
 > **📋 [Changelog](CHANGELOG.md)** - Release notes and version history
@@ -180,19 +182,48 @@ cd frontend
 npm test
 ```
 
-## 🔄 Continuous Integration
+## 🔄 Continuous Integration & Deployment
 
-This project uses GitHub Actions for CI/CD. The workflow runs on:
-- Push to `main` or `develop` branches
-- Pull requests to `main` or `develop` branches
-- Manual workflow dispatch
+This project uses GitHub Actions for automated CI/CD with multiple workflows:
 
-The CI pipeline:
-- ✅ Builds the .NET API
-- ✅ Runs backend tests
-- ✅ Builds the Angular frontend
-- ✅ Runs linting checks
-- ✅ Runs frontend tests
+### Automated Workflows
+
+1. **Continuous Integration** (`ci.yml`)
+   - Runs on every push and PR to `main`/`develop`
+   - Builds and tests both backend and frontend
+   - Validates code quality with linting
+
+2. **Container Testing** (`test-containers.yml`)
+   - Tests Docker builds on every PR
+   - Validates containers start correctly
+   - Runs smoke tests before merge
+
+3. **Automatic Releases** (`publish-release.yml`)
+   - Triggered on push to `main`
+   - Builds and publishes Docker containers to GHCR
+   - Creates GitHub releases with semantic versioning
+   - Generates version based on conventional commits
+
+4. **Manual Releases** (`release.yml`)
+   - Supports manual version releases
+   - Can republish specific versions
+
+### Container Images
+
+Published Docker images are available at GitHub Container Registry:
+
+```bash
+# Pull latest backend
+docker pull ghcr.io/markcoleman/grafana-banana/backend:latest
+
+# Pull latest frontend
+docker pull ghcr.io/markcoleman/grafana-banana/frontend:latest
+
+# Use specific version
+docker pull ghcr.io/markcoleman/grafana-banana/backend:1.0.0
+```
+
+See [CI/CD Workflows Documentation](docs/CI_CD_WORKFLOWS.md) for complete details.
 
 ## 📝 Available Scripts
 
