@@ -30,6 +30,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Set repository name to lowercase
+      id: repo
+      run: |
+        echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+    
     - name: Build Backend API image (test only)
       uses: docker/build-push-action@v5
       with:
@@ -37,7 +42,7 @@ jobs:
         file: ./backend/GrafanaBanana.Api/Dockerfile
         push: false
         tags: |
-          ghcr.io/${{ github.repository }}/backend:test-${{ github.event.pull_request.number || github.sha }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/backend:test-${{ github.event.pull_request.number || github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         load: true
@@ -49,7 +54,7 @@ jobs:
         file: ./frontend/Dockerfile
         push: false
         tags: |
-          ghcr.io/${{ github.repository }}/frontend:test-${{ github.event.pull_request.number || github.sha }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/frontend:test-${{ github.event.pull_request.number || github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         load: true
@@ -61,7 +66,7 @@ jobs:
           -e ASPNETCORE_ENVIRONMENT=Development \
           -e ASPNETCORE_URLS=http://+:8080 \
           -p 5000:8080 \
-          ghcr.io/${{ github.repository }}/backend:test-${{ github.event.pull_request.number || github.sha }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/backend:test-${{ github.event.pull_request.number || github.sha }}
         
         # Wait for the container to be ready
         echo "Waiting for backend to start..."
@@ -93,7 +98,7 @@ jobs:
         # Start the frontend container
         docker run -d --name test-frontend \
           -p 4200:80 \
-          ghcr.io/${{ github.repository }}/frontend:test-${{ github.event.pull_request.number || github.sha }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/frontend:test-${{ github.event.pull_request.number || github.sha }}
         
         # Wait for the container to be ready
         echo "Waiting for frontend to start..."

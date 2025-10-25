@@ -43,6 +43,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Set repository name to lowercase
+      id: repo
+      run: |
+        echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+    
     - name: Extract version from tag
       id: version
       run: |
@@ -65,8 +70,8 @@ jobs:
         file: ./backend/GrafanaBanana.Api/Dockerfile
         push: true
         tags: |
-          ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.version }}
-          ghcr.io/${{ github.repository }}/backend:latest
+          ghcr.io/${{ steps.repo.outputs.repository }}/backend:${{ steps.version.outputs.version }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64,linux/arm64
@@ -78,8 +83,8 @@ jobs:
         file: ./frontend/Dockerfile
         push: true
         tags: |
-          ghcr.io/${{ github.repository }}/frontend:${{ steps.version.outputs.version }}
-          ghcr.io/${{ github.repository }}/frontend:latest
+          ghcr.io/${{ steps.repo.outputs.repository }}/frontend:${{ steps.version.outputs.version }}
+          ghcr.io/${{ steps.repo.outputs.repository }}/frontend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64,linux/arm64
@@ -92,18 +97,18 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Backend API:" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        echo "ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "ghcr.io/${{ github.repository }}/backend:latest" >> $GITHUB_STEP_SUMMARY
+        echo "ghcr.io/${{ steps.repo.outputs.repository }}/backend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "ghcr.io/${{ steps.repo.outputs.repository }}/backend:latest" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Frontend:" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        echo "ghcr.io/${{ github.repository }}/frontend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "ghcr.io/${{ github.repository }}/frontend:latest" >> $GITHUB_STEP_SUMMARY
+        echo "ghcr.io/${{ steps.repo.outputs.repository }}/frontend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "ghcr.io/${{ steps.repo.outputs.repository }}/frontend:latest" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Pull Images" >> $GITHUB_STEP_SUMMARY
         echo '```bash' >> $GITHUB_STEP_SUMMARY
-        echo "docker pull ghcr.io/${{ github.repository }}/backend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "docker pull ghcr.io/${{ github.repository }}/frontend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "docker pull ghcr.io/${{ steps.repo.outputs.repository }}/backend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "docker pull ghcr.io/${{ steps.repo.outputs.repository }}/frontend:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
