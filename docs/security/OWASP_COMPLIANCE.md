@@ -157,7 +157,7 @@ public record CreateUserRequest(
 - Dependabot configured for automated dependency updates
 - Weekly dependency scans
 - Grouped updates for related packages (OpenTelemetry, Serilog, Angular)
-- CodeQL security scanning
+- CodeQL integration planned (pending GitHub SARIF compatibility)
 
 ### Developer Guidelines
 - **Keep dependencies up to date** - respond to Dependabot PRs promptly
@@ -215,7 +215,7 @@ public record CreateUserRequest(
 
 ### CI/CD Security
 - [ ] Code review required before merge
-- [ ] Automated security scanning (CodeQL, Dependabot)
+- [ ] Automated security scanning (Dependabot configured, CodeQL planned)
 - [ ] Build artifacts signed
 - [ ] Deployment requires authorization
 - [ ] Audit trail of all changes

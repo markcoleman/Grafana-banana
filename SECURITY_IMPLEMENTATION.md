@@ -150,44 +150,6 @@ Security enhancements:
 
 ### 4. CI/CD Security
 
-#### CodeQL Security Scanning
-**Location**: `.github/workflows/codeql.yml`
-
-Automated security analysis:
-- Scans C# and JavaScript/TypeScript code
-- Runs on push, PR, and weekly schedule
-- Uses security-extended and security-and-quality queries
-- Integrates with GitHub Security tab
-- Automatic security alerts
-
-Example workflow configuration:
-```yaml
-name: "CodeQL Security Analysis"
-on:
-  push:
-    branches: [ "main", "develop" ]
-  pull_request:
-    branches: [ "main", "develop" ]
-  schedule:
-    - cron: '0 9 * * 1'  # Every Monday at 9:00 AM UTC
-
-jobs:
-  analyze:
-    strategy:
-      matrix:
-        include:
-          - language: csharp
-            build-mode: manual
-          - language: javascript-typescript
-            build-mode: none
-```
-
-Languages covered:
-- C# (manual build mode with .NET 9)
-- JavaScript/TypeScript (automatic analysis)
-
-**OWASP Coverage**: A06:2021 – Vulnerable and Outdated Components, A08:2021 – Software and Data Integrity Failures
-
 #### Dependabot Configuration
 **Location**: `.github/dependabot.yml` (existing, referenced)
 
@@ -421,7 +383,7 @@ The security implementation provides a foundation for future authentication and 
 - [x] A03:2021 – Injection (Input validation implemented)
 - [x] A04:2021 – Insecure Design (Defense in depth)
 - [x] A05:2021 – Security Misconfiguration (Headers, defaults)
-- [x] A06:2021 – Vulnerable Components (Dependabot, CodeQL)
+- [x] A06:2021 – Vulnerable Components (Dependabot monitoring)
 - [x] A07:2021 – Authentication Failures (Framework ready)
 - [x] A08:2021 – Data Integrity Failures (CI/CD security)
 - [x] A09:2021 – Logging Failures (Comprehensive logging)
@@ -450,8 +412,8 @@ The security implementation provides a foundation for future authentication and 
 
 ### Weekly Tasks
 - Review Dependabot alerts
-- Check CodeQL scan results
 - Review security logs
+- Monitor application security events
 
 ### Monthly Tasks
 - Security review of new features
@@ -466,6 +428,8 @@ The security implementation provides a foundation for future authentication and 
 ## Next Steps
 
 ### Short-term (1-3 months)
+- **CodeQL Integration**: Configure GitHub CodeQL scanning once SARIF processing issues are resolved
+- Implement JWT/OAuth2 authentication
 1. Implement JWT authentication
 2. Add role-based access control
 3. Add security-specific unit tests

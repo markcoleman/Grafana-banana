@@ -97,10 +97,10 @@ A comprehensive checklist for both PR authors and reviewers to ensure security s
 - ✅ Docker security (non-root user, health checks)
 
 ### CI/CD
-- ✅ CodeQL security scanning
 - ✅ Dependabot for dependency updates
 - ✅ Automated vulnerability scanning
 - ✅ Security checks in PR workflow
+- 📋 CodeQL integration (planned - pending GitHub SARIF compatibility)
 
 ## Security Architecture
 
@@ -176,8 +176,8 @@ Every access to every resource is checked for authorization.
 
 ### Weekly
 - [ ] Review Dependabot security alerts
-- [ ] Check CodeQL scan results
 - [ ] Review security logs for anomalies
+- [ ] Monitor application security events
 
 ### Monthly
 - [ ] Security review of new features
