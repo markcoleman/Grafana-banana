@@ -49,6 +49,14 @@ If you discover a security vulnerability in Grafana-banana, please report it by:
 
 When deploying Grafana-banana:
 
+### Comprehensive Security Documentation
+
+For detailed security guidelines and best practices, see:
+- **[OWASP Top 10 Compliance Guide](docs/security/OWASP_COMPLIANCE.md)** - Complete guide on addressing OWASP Top 10 vulnerabilities
+- **[API Security Best Practices](docs/security/API_SECURITY.md)** - Comprehensive API security guidelines
+- **[Secure Coding Guidelines](docs/security/SECURE_CODING_GUIDELINES.md)** - Developer guidelines for writing secure code
+- **[PR Security Checklist](docs/security/PR_SECURITY_CHECKLIST.md)** - Security checklist for pull requests
+
 ### General
 - Keep all dependencies up to date
 - Review and act on Dependabot alerts

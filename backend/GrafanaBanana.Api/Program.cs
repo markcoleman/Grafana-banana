@@ -7,6 +7,7 @@ using Serilog;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using GrafanaBanana.Api.Security;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -38,6 +39,9 @@ try
 
     // Add services to the container.
     builder.Services.AddOpenApi();
+
+    // Add security services (rate limiting, input validation, etc.)
+    builder.Services.AddSecurityServices(builder.Configuration);
 
     // Add CORS support
     builder.Services.AddCors(options =>
@@ -118,6 +122,12 @@ try
     {
         app.MapOpenApi();
     }
+
+    // Add security middleware (headers, rate limiting, etc.)
+    app.UseSecurityMiddleware(app.Environment);
+
+    // Add input validation middleware
+    app.UseInputValidation();
 
     // Enable CORS
     app.UseCors("AllowAll");
@@ -200,7 +210,8 @@ try
         }
     })
     .WithName("GetWeatherForecast")
-    .WithOpenApi();
+    .WithOpenApi()
+    .RequireRateLimiting("api");
 
     // Add a metrics endpoint for custom application metrics
     app.MapGet("/api/metrics/custom", (ILogger<Program> logger) =>
