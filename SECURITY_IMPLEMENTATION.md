@@ -130,7 +130,7 @@ Security enhancements:
 - Proper file ownership and permissions
 - Health checks for container monitoring
 - Production environment by default
-- Explicit curl installation for health checks
+- Curl installed before switching to non-root user for health checks
 
 **OWASP Coverage**: A05:2021 – Security Misconfiguration, A04:2021 – Insecure Design
 
@@ -140,10 +140,11 @@ Security enhancements:
 Security enhancements:
 - Security updates installed (`apk upgrade`)
 - Multi-stage build
-- Non-root user (`appuser`) for runtime
-- Proper nginx permissions
+- Full npm dependencies installed for build (dev dependencies required)
 - Health checks for container monitoring
-- Production dependencies only
+- Minimal runtime image with nginx
+
+**Note**: Nginx runs as root by default as it requires elevated privileges to bind to port 80 and access system directories. Security is maintained through proper configuration, minimal attack surface, and security headers.
 
 **OWASP Coverage**: A05:2021 – Security Misconfiguration, A06:2021 – Vulnerable Components
 
