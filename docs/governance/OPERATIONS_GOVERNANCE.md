@@ -558,7 +558,7 @@ Detection → Triage → Response → Resolution → Review
 
 ### Performance Targets
 
-See [Governance Framework - Metrics and KPIs](./GOVERNANCE.md#metrics-and-kpis)
+See [Governance Framework - Metrics and KPIs](../GOVERNANCE.md#metrics-and-kpis)
 
 ### Performance Testing
 
