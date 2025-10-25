@@ -6,6 +6,12 @@ A full-stack web application with .NET Web API backend and Angular frontend, fea
 > 
 > **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
 > 
+> **🏛️ [Governance Framework](docs/GOVERNANCE.md)** - Enterprise governance and compliance documentation
+> 
+> **🏗️ [Architecture Documentation](docs/architecture/TECHNICAL_ARCHITECTURE.md)** - Technical architecture overview
+> 
+> **📐 [Architecture Decision Records](docs/architecture/README.md)** - ADRs documenting key decisions
+> 
 > **🔄 [CI/CD Workflows](docs/CI_CD_WORKFLOWS.md)** - Automated releases and container publishing
 > 
 > **📸 [Screenshots](docs/screenshots/README.md)** - Visual documentation of the application
@@ -393,6 +399,29 @@ git push origin v0.1.0
 ```
 
 Or create a release through the GitHub UI, which will trigger the automated container publishing workflow.
+
+## 🏛️ Enterprise Governance
+
+This project follows enterprise-grade governance practices suitable for corporate environments:
+
+### Architecture & Decision Making
+
+- **[Governance Framework](docs/GOVERNANCE.md)**: Comprehensive governance policies and processes
+- **[Architecture Decision Records (ADRs)](docs/architecture/README.md)**: Documented architectural decisions
+- **[Technical Architecture](docs/architecture/TECHNICAL_ARCHITECTURE.md)**: System architecture documentation
+
+### Key Governance Areas
+
+- **Decision Making**: Structured ADR process for architectural decisions
+- **Security Governance**: Defense-in-depth security controls and policies
+- **Data Governance**: Data classification, retention, and protection policies
+- **Change Management**: Controlled change process with appropriate approvals
+- **Risk Management**: Risk assessment and mitigation strategies
+- **Quality Assurance**: Quality gates and standards for code and documentation
+- **Compliance**: Adherence to industry standards (OWASP, CIS, NIST)
+- **Metrics & KPIs**: Defined success metrics for development and operations
+
+See the [Governance Framework](docs/GOVERNANCE.md) for complete documentation.
 
 ## 📸 Screenshots
 
