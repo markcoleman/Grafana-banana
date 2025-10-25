@@ -103,7 +103,9 @@ public class DatabricksService : IDatabricksService
         activity?.SetTag("databricks.query_region", region);
         activity?.SetTag("databricks.mock_mode", _settings.MockMode);
 
-        _logger.LogInformation("Fetching banana sales data for region {Region}", region);
+        // Sanitize region parameter for logging to prevent log forging
+        var sanitizedRegion = region?.Replace("\n", "").Replace("\r", "") ?? "unknown";
+        _logger.LogInformation("Fetching banana sales data for region {Region}", sanitizedRegion);
 
         await Task.Delay(Random.Shared.Next(50, 150), cancellationToken); // Simulate query time
 

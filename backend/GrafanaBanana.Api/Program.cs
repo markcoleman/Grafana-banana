@@ -373,7 +373,9 @@ try
         activity?.SetTag("databricks.query_type", "sales");
         activity?.SetTag("databricks.query_region", region ?? "all");
 
-        logger.LogInformation("Fetching banana sales data for region {Region}", region ?? "all");
+        // Sanitize region parameter for logging to prevent log forging
+        var sanitizedRegion = (region ?? "all").Replace("\n", "").Replace("\r", "");
+        logger.LogInformation("Fetching banana sales data for region {Region}", sanitizedRegion);
 
         try
         {

@@ -239,6 +239,8 @@ To connect to a real Databricks SQL Warehouse:
 
 ```csharp
 // In DatabricksService.cs
+// NOTE: This is pseudo-code showing the general pattern
+// Actual implementation depends on the Databricks connector used
 if (!_settings.MockMode)
 {
     using var connection = new DatabricksConnection
@@ -315,14 +317,13 @@ Potential improvements:
 
 ## Screenshots
 
-![Banana Analytics Dashboard](docs/screenshots/banana-analytics-dashboard.png)
-
-The dashboard features:
-- Modern glass-morphism design
+The dashboard features a modern glass-morphism design with:
 - Gradient color schemes
 - Responsive layout
 - Real-time data loading
 - Smooth animations and hover effects
+
+For screenshots of the application, see the PR description or the [docs/screenshots](../screenshots/) directory.
 
 ## API Rate Limiting
 
