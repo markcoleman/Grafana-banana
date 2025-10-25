@@ -106,6 +106,17 @@ Security improvements:
 - Cache control for static assets
 - Gzip compression optimized
 
+Example configuration snippet:
+```nginx
+# Security headers (OWASP recommendations)
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; ..." always;
+```
+
 **OWASP Coverage**: A05:2021 – Security Misconfiguration
 
 ### 3. Docker Security
@@ -148,8 +159,30 @@ Automated security analysis:
 - Integrates with GitHub Security tab
 - Automatic security alerts
 
+Example workflow configuration:
+```yaml
+name: "CodeQL Security Analysis"
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9:00 AM UTC
+
+jobs:
+  analyze:
+    strategy:
+      matrix:
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+```
+
 Languages covered:
-- C# (manual build mode)
+- C# (manual build mode with .NET 9)
 - JavaScript/TypeScript (automatic analysis)
 
 **OWASP Coverage**: A06:2021 – Vulnerable and Outdated Components, A08:2021 – Software and Data Integrity Failures
@@ -304,6 +337,24 @@ The implementation follows a layered security approach (defense in depth):
      - Truncates long strings
      - Prevents injection of fake log entries
    - **Location**: `backend/GrafanaBanana.Api/Security/InputValidationMiddleware.cs`
+   
+   Implementation:
+   ```csharp
+   private static string SanitizeForLogging(string value)
+   {
+       if (string.IsNullOrWhiteSpace(value))
+           return string.Empty;
+
+       // Remove newlines and carriage returns to prevent log forging
+       var sanitized = value.Replace("\r", "").Replace("\n", " ");
+       
+       // Truncate long strings to prevent log pollution
+       if (sanitized.Length > 200)
+           sanitized = sanitized.Substring(0, 200) + "...";
+       
+       return sanitized;
+   }
+   ```
 
 ### Prevented Vulnerabilities
 
@@ -453,6 +504,6 @@ All implementations follow industry best practices and are fully compliant with 
 
 ---
 
-**Date**: 2025-10-25  
 **Version**: 1.0  
-**Status**: Completed and Verified
+**Status**: Completed and Verified  
+**Last Updated**: October 2025
