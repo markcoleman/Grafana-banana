@@ -22,7 +22,8 @@ WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 
 # Copy built Angular app from build stage
-COPY --from=build /app/dist/frontend .
+# Angular's new @angular/build:application builder outputs to dist/<project>/browser
+COPY --from=build /app/dist/frontend/browser .
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
