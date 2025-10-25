@@ -47,12 +47,11 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      # Autobuild attempts to build any compiled languages (C#)
-      - name: Autobuild
+      # Autobuild only for compiled languages (C#)
+      - if: matrix.language == 'csharp'
+        name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
       # Perform CodeQL Analysis
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{matrix.language}}"
