@@ -51,7 +51,6 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          queries: +security-extended,security-and-quality
 
       # Build C# project
       - if: matrix.build-mode == 'manual' && matrix.language == 'csharp'

@@ -84,8 +84,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 app.MapGet("/api/admin/data", () => GetData())
     .RequireAuthorization("AdminPolicy");
 
-// Use secure password hashing
-using var hash = new Rfc2898DeriveBytes(password, salt, iterations: 100000);
+// Use secure password hashing (OWASP recommends at least 600,000 iterations as of 2023)
+using var hash = new Rfc2898DeriveBytes(password, salt, iterations: 600000);
 ```
 
 #### ❌ DON'T

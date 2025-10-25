@@ -99,7 +99,7 @@ public class InputValidationMiddleware
         
         // Truncate long strings to prevent log pollution
         if (sanitized.Length > 200)
-            sanitized = sanitized.Substring(0, 200) + "...";
+            sanitized = sanitized[..200] + "...";
         
         return sanitized;
     }
