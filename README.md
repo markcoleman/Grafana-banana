@@ -1,8 +1,10 @@
 # Grafana-banana
 
-A full-stack web application with .NET Web API backend and Angular frontend, featuring comprehensive observability with Grafana, Prometheus, Tempo, and Loki.
+A full-stack web application with .NET Web API backend and Angular frontend, featuring comprehensive observability with Grafana, Prometheus, Tempo, and Loki, plus fun Databricks integration for banana analytics! 🍌
 
 > **🚀 [Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes!
+> 
+> **🍌 [Databricks Integration](docs/DATABRICKS_INTEGRATION.md)** - Banana analytics powered by Databricks
 > 
 > **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
 > 
@@ -81,6 +83,9 @@ Grafana-banana/
 - `GET /api/metrics/custom` - Custom metrics info
 - `GET /api/trace/test` - Test distributed tracing
 - `GET /api/error/test` - Test error tracking
+- `GET /api/databricks/banana-analytics` - 🍌 Banana analytics from Databricks
+- `GET /api/databricks/production/{year}` - 🍌 Production data by year
+- `GET /api/databricks/sales` - 🍌 Sales data by region
 
 ## 🚀 Getting Started
 
