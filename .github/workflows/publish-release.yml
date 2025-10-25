@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Prevent multiple simultaneous releases
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: write
@@ -15,6 +20,7 @@ jobs:
   determine-version:
     name: Determine Next Version
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.semver.outputs.version }}
       tag: ${{ steps.semver.outputs.tag }}
@@ -79,6 +85,7 @@ jobs:
   build-and-push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: determine-version
     outputs:
       backend-digest: ${{ steps.backend-build.outputs.digest }}
@@ -135,6 +142,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [determine-version, build-and-push]
     
     steps:

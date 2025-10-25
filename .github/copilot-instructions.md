@@ -261,3 +261,39 @@ constructor(private dataService: DataService) {}
 - Verify CORS configuration if getting 403/CORS errors
 
 Remember to always test changes locally in the dev container before committing!
+
+## GitHub Actions Workflows
+
+### Workflow Efficiency
+
+All workflows have been optimized for efficiency:
+
+- **Concurrency Controls**: Automatic cancellation of redundant runs for the same PR/branch
+- **Path Filters**: CI/test workflows skip when only documentation changes
+- **Caching**: Enhanced caching for .NET, npm, and Docker layers
+- **Timeouts**: All jobs have appropriate timeout limits to prevent hanging
+- **Optimized Commands**: Using `npm ci --prefer-offline --no-audit` for faster installs
+
+### Available Workflows
+
+- **CI Build** (`ci.yml`): Runs on push/PR to main/develop, builds and tests both frontend and backend
+- **Test Container Build** (`test-containers.yml`): Tests Docker image builds on PRs
+- **Publish Release** (`publish-release.yml`): Automatic release on push to main with semantic versioning
+- **Manual Release** (`release.yml`): Manual release workflow for tagged versions
+- **Stale** (`stale.yml`): Weekly check for stale issues/PRs (every Monday)
+- **Greetings** (`greetings.yml`): Welcome messages for first-time contributors
+- **Labeler** (`labeler.yml`): Automatic PR labeling based on changed files
+
+### Best Practices for Workflow Changes
+
+When modifying or adding workflows:
+
+1. Always include concurrency controls to prevent duplicate runs
+2. Add timeout limits appropriate to the job duration
+3. Use path filters to skip unnecessary runs (e.g., docs-only changes)
+4. Implement caching for dependencies and build artifacts
+5. Use `npm ci --prefer-offline` for faster npm installs
+6. Test workflows locally when possible or use `workflow_dispatch` trigger
+
+See `.github/WORKFLOW_OPTIMIZATIONS.md` for detailed documentation.
+
