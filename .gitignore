@@ -76,6 +76,9 @@ Thumbs.db
 # Observability logs
 backend/GrafanaBanana.Api/logs/
 
+# Dev container cache directories
+.devcontainer/.cache/
+
 # Screenshots - ignore image files but keep README.md files
 docs/screenshots/**/*.png
 docs/screenshots/**/*.jpg

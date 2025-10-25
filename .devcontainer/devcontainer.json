@@ -37,6 +37,17 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "cd frontend && npm install",
-  "remoteUser": "vscode"
+  // Optimize startup: only install npm dependencies, defer other setup
+  "postCreateCommand": "cd frontend && npm ci --prefer-offline --no-audit",
+  "remoteUser": "vscode",
+  
+  // Enable better caching and performance
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/.cache/nuget,target=/home/vscode/.nuget/packages,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.devcontainer/.cache/npm,target=/home/vscode/.npm,type=bind,consistency=cached"
+  ],
+  
+  // Lifecycle scripts for efficient management
+  "postStartCommand": "echo 'Dev container started successfully!'",
+  "postAttachCommand": "echo 'Ready for development. Run make start-backend or make start-frontend to begin.'"
 }

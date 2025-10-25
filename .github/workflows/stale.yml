@@ -2,7 +2,7 @@ name: "Mark stale issues and PRs"
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Run daily at midnight UTC
+    - cron: "0 2 * * 1" # Run weekly on Monday at 2 AM UTC (reduced from daily)
   workflow_dispatch:
 
 permissions:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/stale@v10
         with:

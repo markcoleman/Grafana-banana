@@ -3,9 +3,26 @@ name: CI Build
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+      - 'LICENSE'
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+      - 'LICENSE'
   workflow_dispatch:
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -15,6 +32,7 @@ jobs:
   build-backend:
     name: Build .NET API
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
     - uses: actions/checkout@v5
@@ -23,6 +41,8 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '9.0.x'
+        cache: true
+        cache-dependency-path: backend/GrafanaBanana.Api/GrafanaBanana.Api.csproj
     
     - name: Restore dependencies
       run: dotnet restore backend/GrafanaBanana.Api/GrafanaBanana.Api.csproj
@@ -36,6 +56,7 @@ jobs:
   build-frontend:
     name: Build Angular App
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
     - uses: actions/checkout@v5
@@ -48,13 +69,13 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
     
     - name: Install dependencies
-      run: cd frontend && npm ci
+      run: cd frontend && npm ci --prefer-offline --no-audit
     
     - name: Lint
       run: cd frontend && npm run lint
     
     - name: Build
-      run: cd frontend && npm run build
+      run: cd frontend && npm run build -- --configuration production
     
     - name: Test
-      run: cd frontend && npm run test -- --watch=false --browsers=ChromeHeadless
+      run: cd frontend && npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage=false
