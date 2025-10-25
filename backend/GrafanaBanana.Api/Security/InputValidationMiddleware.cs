@@ -40,8 +40,8 @@ public class InputValidationMiddleware
             {
                 _logger.LogWarning(
                     "Potentially malicious request detected from {RemoteIp}. Path: {Path}",
-                    context.Connection.RemoteIpAddress,
-                    context.Request.Path);
+                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    SanitizeForLogging(context.Request.Path.ToString()));
 
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsJsonAsync(new
@@ -60,8 +60,8 @@ public class InputValidationMiddleware
             {
                 _logger.LogWarning(
                     "Potentially malicious query parameter detected from {RemoteIp}. Parameter: {Parameter}",
-                    context.Connection.RemoteIpAddress,
-                    query.Key);
+                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    SanitizeForLogging(query.Key));
 
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsJsonAsync(new
@@ -83,6 +83,25 @@ public class InputValidationMiddleware
 
         return DangerousPatterns.Any(pattern => 
             content.Contains(pattern, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Sanitizes a string for safe logging by removing or escaping potentially malicious content.
+    /// Prevents log forging attacks.
+    /// </summary>
+    private static string SanitizeForLogging(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        // Remove newlines and carriage returns to prevent log forging
+        var sanitized = value.Replace("\r", "").Replace("\n", " ");
+        
+        // Truncate long strings to prevent log pollution
+        if (sanitized.Length > 200)
+            sanitized = sanitized.Substring(0, 200) + "...";
+        
+        return sanitized;
     }
 }
 
