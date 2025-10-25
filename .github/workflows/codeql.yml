@@ -19,39 +19,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze:
-    name: Analyze (${{ matrix.language }})
+  analyze-csharp:
+    name: Analyze C#
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:
-      # Required for all workflows
       security-events: write
-      # Required to fetch internal or private CodeQL packs
       packages: read
-      # Required for workflows in private repositories
       actions: read
       contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'csharp', 'javascript-typescript' ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Initialize CodeQL tools for scanning
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: csharp
 
-      # Autobuild only for compiled languages (C#)
-      - if: matrix.language == 'csharp'
-        name: Autobuild
+      - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
-      # Perform CodeQL Analysis
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+
+  analyze-javascript:
+    name: Analyze JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
