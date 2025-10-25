@@ -2,6 +2,7 @@ import { Component, signal, OnInit, inject, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WeatherService, WeatherForecast } from './weather.service';
+import { DatabricksService, BananaAnalytics } from './databricks.service';
 
 @Component({
   selector: 'app-root',
@@ -11,12 +12,18 @@ import { WeatherService, WeatherForecast } from './weather.service';
 })
 export class App implements OnInit {
   private weatherService = inject(WeatherService);
+  private databricksService = inject(DatabricksService);
   
   protected readonly title = signal('Grafana-banana');
   protected weatherData = signal<WeatherForecast[]>([]);
   protected loading = signal(false);
   protected error = signal<string | null>(null);
   protected isDarkMode = signal(false);
+  
+  // Banana Analytics data
+  protected bananaAnalytics = signal<BananaAnalytics | null>(null);
+  protected bananaLoading = signal(false);
+  protected bananaError = signal<string | null>(null);
 
   constructor() {
     // Initialize dark mode from system preference or localStorage
@@ -38,6 +45,7 @@ export class App implements OnInit {
 
   ngOnInit() {
     this.loadWeatherData();
+    this.loadBananaAnalytics();
   }
 
   loadWeatherData() {
@@ -57,6 +65,23 @@ export class App implements OnInit {
     });
   }
 
+  loadBananaAnalytics() {
+    this.bananaLoading.set(true);
+    this.bananaError.set(null);
+    
+    this.databricksService.getBananaAnalytics().subscribe({
+      next: (data) => {
+        this.bananaAnalytics.set(data);
+        this.bananaLoading.set(false);
+      },
+      error: (err) => {
+        this.bananaError.set('Failed to load banana analytics from Databricks. Make sure the API is running.');
+        this.bananaLoading.set(false);
+        console.error('Error loading banana analytics:', err);
+      }
+    });
+  }
+
   toggleDarkMode() {
     this.isDarkMode.set(!this.isDarkMode());
     if (typeof window !== 'undefined') {
@@ -67,6 +92,22 @@ export class App implements OnInit {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  formatNumber(num: number): string {
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num);
+  }
+
+  formatCurrency(num: number): string {
+    return new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      maximumFractionDigits: 0 
+    }).format(num);
+  }
+
+  formatDateTime(dateString: string): string {
+    return new Date(dateString).toLocaleString();
   }
 
   getWeatherEmoji(summary: string | null): string {
