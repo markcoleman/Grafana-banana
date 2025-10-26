@@ -229,33 +229,33 @@ When adding new features:
 1. **For Read Operations** (Queries):
    ```csharp
    // 1. Create Query
-   public record GetNewDataQuery(int Id) : IRequest<DataDto>;
+   public record GetBananaByIdQuery(int Id) : IRequest<BananaAnalytics>;
    
    // 2. Create Handler
-   public class GetNewDataQueryHandler : IRequestHandler<GetNewDataQuery, DataDto>
+   public class GetBananaByIdQueryHandler : IRequestHandler<GetBananaByIdQuery, BananaAnalytics>
    {
        // Implementation
    }
    
    // 3. Add Endpoint
-   app.MapGet("/api/data/{id}", async (int id, IMediator mediator) =>
-       await mediator.Send(new GetNewDataQuery(id)));
+   app.MapGet("/api/banana/{id}", async (int id, IMediator mediator) =>
+       await mediator.Send(new GetBananaByIdQuery(id)));
    ```
 
 2. **For Write Operations** (Commands):
    ```csharp
-   // 1. Create Command
-   public record CreateDataCommand(DataDto Data) : IRequest<Guid>;
+   // 1. Create Command (with DTO)
+   public record CreateBananaCommand(string Region, int ProductionTons) : IRequest<Guid>;
    
    // 2. Create Handler
-   public class CreateDataCommandHandler : IRequestHandler<CreateDataCommand, Guid>
+   public class CreateBananaCommandHandler : IRequestHandler<CreateBananaCommand, Guid>
    {
        // Implementation
    }
    
    // 3. Add Endpoint
-   app.MapPost("/api/data", async (DataDto data, IMediator mediator) =>
-       await mediator.Send(new CreateDataCommand(data)));
+   app.MapPost("/api/banana", async (CreateBananaCommand command, IMediator mediator) =>
+       await mediator.Send(command));
    ```
 
 ### Future Enhancements

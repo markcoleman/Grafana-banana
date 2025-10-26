@@ -306,10 +306,20 @@ public class GetWeatherForecastQueryHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IWeatherForecastRepository>();
-        mockRepo.Setup(r => r.GetForecastsAsync(5, default))
-                .ReturnsAsync(GetTestForecasts());
+        var testForecasts = new List<WeatherForecast>
+        {
+            WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), 20, "Sunny"),
+            WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now.AddDays(2)), 22, "Cloudy"),
+            WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now.AddDays(3)), 18, "Rainy"),
+            WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now.AddDays(4)), 25, "Hot"),
+            WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now.AddDays(5)), 15, "Cool")
+        };
         
-        var handler = new GetWeatherForecastQueryHandler(mockRepo.Object, Mock.Of<ILogger>());
+        mockRepo.Setup(r => r.GetForecastsAsync(5, default))
+                .ReturnsAsync(testForecasts);
+        
+        var mockLogger = new Mock<ILogger<GetWeatherForecastQueryHandler>>();
+        var handler = new GetWeatherForecastQueryHandler(mockRepo.Object, mockLogger.Object);
         var query = new GetWeatherForecastQuery(Days: 5);
         
         // Act
@@ -318,6 +328,7 @@ public class GetWeatherForecastQueryHandlerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(5, result.Count());
+        mockRepo.Verify(r => r.GetForecastsAsync(5, default), Times.Once);
     }
 }
 ```
@@ -464,7 +475,7 @@ public interface IUnitOfWork
 
 ## References
 
-- [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Clean Architecture: A Craftsman's Guide to Software Structure and Design by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [CQRS Pattern by Martin Fowler](https://martinfowler.com/bliki/CQRS.html)
 - [MediatR Documentation](https://github.com/jbogard/MediatR)
 - [Repository Pattern by Martin Fowler](https://martinfowler.com/eaaCatalog/repository.html)
