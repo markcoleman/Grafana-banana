@@ -297,3 +297,271 @@ When modifying or adding workflows:
 
 See `.github/WORKFLOW_OPTIMIZATIONS.md` for detailed documentation.
 
+## Enterprise Architecture Patterns
+
+This codebase implements enterprise-grade architecture patterns. Understanding these patterns is crucial for Copilot to generate appropriate code.
+
+### Architecture Overview
+
+The backend follows **Clean Architecture** with these layers:
+
+```
+┌─────────────────────────────────────────────┐
+│           API Layer (Program.cs)            │
+│        HTTP Endpoints, Middleware           │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│        Application Layer (Queries,          │
+│        Handlers, Commands)                  │
+│        Business Use Cases                   │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│         Domain Layer (Entities,             │
+│         Repository Interfaces)              │
+│         Core Business Logic                 │
+└─────────────────────────────────────────────┘
+                    ↑
+┌─────────────────────────────────────────────┐
+│     Infrastructure Layer (Repository        │
+│     Implementations, External Services)     │
+│     Data Access, External APIs              │
+└─────────────────────────────────────────────┘
+```
+
+### Key Patterns
+
+#### 1. CQRS (Command Query Responsibility Segregation)
+
+**Queries** (Read Operations):
+- Defined as immutable records in `Application/Queries/`
+- Return data without modifying state
+- Example: `GetWeatherForecastQuery`, `GetBananaAnalyticsQuery`
+
+**Commands** (Write Operations):
+- Defined as records in `Application/Commands/`
+- Modify state and return results
+- Example: `CreateBananaCommand` (when implemented)
+
+**Pattern Usage**:
+```csharp
+// Define Query
+public record GetWeatherForecastQuery(int Days = 5) 
+    : IRequest<IEnumerable<WeatherForecast>>;
+
+// Define Handler
+public class GetWeatherForecastQueryHandler 
+    : IRequestHandler<GetWeatherForecastQuery, IEnumerable<WeatherForecast>>
+{
+    private readonly IWeatherForecastRepository _repository;
+    
+    public async Task<IEnumerable<WeatherForecast>> Handle(
+        GetWeatherForecastQuery request, 
+        CancellationToken cancellationToken)
+    {
+        return await _repository.GetForecastsAsync(request.Days, cancellationToken);
+    }
+}
+
+// Use in endpoint
+app.MapGet("/weatherforecast", async (IMediator mediator) =>
+{
+    return await mediator.Send(new GetWeatherForecastQuery(Days: 5));
+});
+```
+
+#### 2. Repository Pattern
+
+**Purpose**: Abstract data access logic from business logic
+
+**Structure**:
+- **Interface** (Domain layer): `IWeatherForecastRepository`
+- **Implementation** (Infrastructure layer): `WeatherForecastRepository`
+
+**Benefits**:
+- Easy to mock for unit testing
+- Can swap implementations (in-memory, database, API)
+- Separates concerns between domain and data access
+
+**Example**:
+```csharp
+// Interface in Domain/Repositories/
+public interface IWeatherForecastRepository
+{
+    Task<IEnumerable<WeatherForecast>> GetForecastsAsync(
+        int days, 
+        CancellationToken cancellationToken = default);
+}
+
+// Implementation in Infrastructure/Repositories/
+public class WeatherForecastRepository : IWeatherForecastRepository
+{
+    public async Task<IEnumerable<WeatherForecast>> GetForecastsAsync(
+        int days, 
+        CancellationToken cancellationToken)
+    {
+        // Data access implementation
+    }
+}
+```
+
+#### 3. Mediator Pattern (MediatR)
+
+**Purpose**: Decouple request senders from handlers
+
+**Benefits**:
+- Reduced coupling between components
+- Easy to add cross-cutting concerns (validation, logging, caching)
+- Supports pipeline behaviors
+
+**Flow**:
+```
+API Endpoint → MediatR.Send(Query) → Handler → Repository → Data
+```
+
+**Usage**:
+```csharp
+// In endpoint - no direct handler reference
+app.MapGet("/api/data", async (IMediator mediator) =>
+{
+    var query = new GetDataQuery(id: 123);
+    return await mediator.Send(query);
+});
+// MediatR automatically finds and invokes the correct handler
+```
+
+#### 4. Dependency Inversion Principle
+
+**Rule**: Depend on abstractions (interfaces), not concrete implementations
+
+**Example**:
+```csharp
+// ✅ Good - Depends on interface
+public class Handler
+{
+    private readonly IRepository _repository;  // Interface
+    
+    public Handler(IRepository repository)
+    {
+        _repository = repository;
+    }
+}
+
+// ❌ Bad - Depends on concrete class
+public class Handler
+{
+    private readonly ConcreteRepository _repository;  // Concrete
+}
+```
+
+### Folder Structure for Enterprise Patterns
+
+```
+backend/GrafanaBanana.Api/
+├── Domain/                    # Core business logic (no dependencies)
+│   ├── Entities/             # Business entities with domain logic
+│   │   └── WeatherForecast.cs
+│   └── Repositories/         # Repository interfaces (contracts)
+│       ├── IWeatherForecastRepository.cs
+│       └── IBananaAnalyticsRepository.cs
+│
+├── Application/              # Use cases and business workflows
+│   ├── Queries/             # CQRS read operations
+│   │   ├── GetWeatherForecastQuery.cs
+│   │   └── GetBananaAnalyticsQuery.cs
+│   ├── Commands/            # CQRS write operations (when needed)
+│   ├── Handlers/            # Query/Command handlers
+│   │   ├── GetWeatherForecastQueryHandler.cs
+│   │   └── GetBananaAnalyticsQueryHandler.cs
+│   └── DependencyInjection.cs  # Service registration
+│
+├── Infrastructure/          # External concerns (data, services)
+│   └── Repositories/       # Repository implementations
+│       ├── WeatherForecastRepository.cs
+│       └── BananaAnalyticsRepository.cs
+│
+├── Security/               # Security middleware
+├── Databricks/            # External service integration
+└── Program.cs             # API layer - HTTP endpoints
+```
+
+### Adding New Features
+
+**For a new Query (read operation)**:
+
+1. Create query record in `Application/Queries/`
+2. Create handler in `Application/Handlers/`
+3. Create repository interface in `Domain/Repositories/` (if needed)
+4. Create repository implementation in `Infrastructure/Repositories/`
+5. Register repository in `Application/DependencyInjection.cs`
+6. Add endpoint in `Program.cs` using `mediator.Send(query)`
+
+**For a new Command (write operation)**:
+
+1. Create command record in `Application/Commands/`
+2. Create handler in `Application/Handlers/`
+3. Follow same repository pattern as queries
+4. Add endpoint using `mediator.Send(command)`
+
+### Code Quality Principles
+
+When Copilot generates code, ensure it follows:
+
+1. **XML Documentation**: All public types and members should have XML docs
+2. **Async/Await**: Use async methods for I/O operations
+3. **Cancellation Tokens**: Pass cancellation tokens through the call stack
+4. **Logging**: Add structured logging at key points
+5. **Error Handling**: Use try-catch with appropriate error responses
+6. **Validation**: Validate input in handlers or domain entities
+7. **Immutability**: Use records for DTOs, queries, and commands
+
+### Testing Approach
+
+When writing tests for enterprise patterns:
+
+```csharp
+public class GetWeatherForecastQueryHandlerTests
+{
+    [Fact]
+    public async Task Handle_ReturnsForecasts()
+    {
+        // Arrange
+        var mockRepo = new Mock<IWeatherForecastRepository>();
+        mockRepo.Setup(r => r.GetForecastsAsync(5, default))
+            .ReturnsAsync(new[] { 
+                WeatherForecast.Create(DateOnly.FromDateTime(DateTime.Now), 20, "Sunny") 
+            });
+        
+        var handler = new GetWeatherForecastQueryHandler(
+            mockRepo.Object, 
+            Mock.Of<ILogger<GetWeatherForecastQueryHandler>>());
+        
+        // Act
+        var result = await handler.Handle(
+            new GetWeatherForecastQuery(Days: 5), 
+            default);
+        
+        // Assert
+        Assert.NotNull(result);
+        Assert.Single(result);
+    }
+}
+```
+
+### Best Practices for Copilot
+
+1. **Use Clear Names**: `GetBananaProductionByYearQuery` not `BananaQuery`
+2. **Follow Existing Patterns**: Open similar files as reference
+3. **XML Comments First**: Write detailed XML docs, let Copilot implement
+4. **Respect Layer Boundaries**: Don't reference Infrastructure from Domain
+5. **One Responsibility**: Each handler handles one query/command
+6. **Immutable DTOs**: Use records for data transfer objects
+
+### Additional Resources
+
+- [Copilot Best Practices Document](.github/COPILOT_BEST_PRACTICES.md) - Detailed patterns and examples
+- [Enterprise Architecture Patterns](docs/ENTERPRISE_ARCHITECTURE_PATTERNS.md) - Full implementation guide
+- [ADR-0006](docs/architecture/ADR-0006-enterprise-architecture-patterns.md) - Architecture decision record
+
+
