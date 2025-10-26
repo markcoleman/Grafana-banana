@@ -8,6 +8,8 @@ Built using enterprise architecture patterns including Clean Architecture, CQRS,
 > 
 > **🏛️ [Enterprise Architecture Patterns](docs/ENTERPRISE_ARCHITECTURE_PATTERNS.md)** - Clean Architecture, CQRS, Repository Pattern
 > 
+> **📊 [Architecture Visual Guide](docs/ARCHITECTURE_VISUAL_GUIDE.md)** - Diagrams and visual documentation
+> 
 > **🍌 [Databricks Integration](docs/DATABRICKS_INTEGRATION.md)** - Banana analytics powered by Databricks
 > 
 > **📊 [Observability Guide](observability/README.md)** - Complete monitoring and tracing documentation
