@@ -26,11 +26,10 @@ public class GetBananaSalesQueryHandler : IRequestHandler<GetBananaSalesQuery, L
     public async Task<List<BananaSalesData>> Handle(GetBananaSalesQuery request, CancellationToken cancellationToken)
     {
         // Sanitize region parameter for logging to prevent log forging
-        var region = request.Region ?? "Global";
-        var sanitizedRegion = region.Replace("\n", "").Replace("\r", "");
+        var sanitizedRegion = request.Region.Replace("\n", "").Replace("\r", "");
         _logger.LogInformation("Handling GetBananaSalesQuery for region {Region}", sanitizedRegion);
 
-        var sales = await _repository.GetSalesDataAsync(region, cancellationToken);
+        var sales = await _repository.GetSalesDataAsync(request.Region, cancellationToken);
 
         _logger.LogInformation("Retrieved {Count} sales records", sales.Count);
 
