@@ -154,6 +154,7 @@ ADRs can be:
 | [0003](./ADR-0003-grafana-observability-stack.md) | Use Grafana Stack for Observability | Accepted | 2025-10-25 |
 | [0004](./ADR-0004-github-actions-cicd.md) | Use GitHub Actions for CI/CD | Accepted | 2025-10-25 |
 | [0005](./ADR-0005-semantic-versioning.md) | Adopt Semantic Versioning | Accepted | 2025-10-25 |
+| [0006](./ADR-0006-enterprise-architecture-patterns.md) | Enterprise Architecture Patterns Implementation | Accepted | 2025-10-26 |
 
 ### Superseded ADRs
 
@@ -172,6 +173,9 @@ ADRs can be:
 ### Technology Stack
 - [ADR-0001: Use .NET 9 for Backend Framework](./ADR-0001-dotnet-backend-framework.md)
 - [ADR-0002: Use Angular for Frontend Framework](./ADR-0002-angular-frontend-framework.md)
+
+### Architecture
+- [ADR-0006: Enterprise Architecture Patterns Implementation](./ADR-0006-enterprise-architecture-patterns.md)
 
 ### Observability
 - [ADR-0003: Use Grafana Stack for Observability](./ADR-0003-grafana-observability-stack.md)
@@ -218,5 +222,5 @@ For questions about ADRs or the process:
 
 ---
 
-**Last Updated**: 2025-10-25  
+**Last Updated**: 2025-10-26  
 **Document Owner**: Technical Lead
