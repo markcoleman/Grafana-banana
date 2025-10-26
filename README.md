@@ -8,6 +8,10 @@ Built using enterprise architecture patterns including Clean Architecture, CQRS,
 > 
 > **🏛️ [Enterprise Architecture Patterns](docs/ENTERPRISE_ARCHITECTURE_PATTERNS.md)** - Clean Architecture, CQRS, Repository Pattern
 > 
+> **🤖 [Copilot Best Practices](.github/COPILOT_BEST_PRACTICES.md)** - Guide for using GitHub Copilot with enterprise patterns
+> 
+> **📝 [Copilot Code Examples](docs/COPILOT_CODE_EXAMPLES.md)** - Working code examples for all architecture patterns
+> 
 > **📊 [Architecture Visual Guide](docs/ARCHITECTURE_VISUAL_GUIDE.md)** - Diagrams and visual documentation
 > 
 > **🍌 [Databricks Integration](docs/DATABRICKS_INTEGRATION.md)** - Banana analytics powered by Databricks
