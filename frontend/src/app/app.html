@@ -31,6 +31,129 @@
     </header>
 
     <main>
+      <!-- Banana Analytics Section -->
+      <section class="animate-slide-up mb-8">
+        <div class="glass-card rounded-3xl p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-md">
+              <span class="text-2xl">🍌</span>
+            </div>
+            <div>
+              <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Banana Analytics</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Powered by Databricks 🧱✨</p>
+            </div>
+          </div>
+
+          @if (bananaLoading()) {
+            <div class="flex flex-col items-center justify-center py-16 animate-pulse">
+              <div class="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p class="text-gray-600 dark:text-gray-400 font-medium">Loading banana analytics from Databricks...</p>
+            </div>
+          }
+
+          @if (bananaError()) {
+            <div class="glass-card rounded-2xl p-6 border-2 border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 animate-scale-in">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">⚠️</span>
+                <div class="flex-1">
+                  <p class="text-yellow-700 dark:text-yellow-300 mb-4">{{ bananaError() }}</p>
+                  <button 
+                    (click)="loadBananaAnalytics()"
+                    class="btn-modern bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white">
+                    🔄 Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (!bananaLoading() && !bananaError() && bananaAnalytics()) {
+            <div class="space-y-6">
+              <!-- Summary Stats Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="glass-card rounded-xl p-5 card-hover animate-scale-in">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">🏭</span>
+                    <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Production</span>
+                  </div>
+                  <div class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 text-transparent bg-clip-text">
+                    {{ formatNumber(bananaAnalytics()!.summary.totalProductionTons) }} tons
+                  </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-5 card-hover animate-scale-in">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">💰</span>
+                    <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Revenue</span>
+                  </div>
+                  <div class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 text-transparent bg-clip-text">
+                    {{ formatCurrency(bananaAnalytics()!.summary.totalRevenue) }}
+                  </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-5 card-hover animate-scale-in">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">⭐</span>
+                    <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Quality Score</span>
+                  </div>
+                  <div class="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 dark:from-yellow-400 dark:to-orange-400 text-transparent bg-clip-text">
+                    {{ bananaAnalytics()!.summary.globalAverageQuality.toFixed(2) }} / 5.0
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Stats -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card rounded-xl p-4 text-center">
+                  <div class="text-2xl mb-2">🌍</div>
+                  <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ bananaAnalytics()!.summary.countriesServed }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">Countries Served</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 text-center">
+                  <div class="text-2xl mb-2">📍</div>
+                  <div class="text-lg font-bold text-gray-900 dark:text-white">{{ bananaAnalytics()!.summary.topProducingRegion }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">Top Region</div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 text-center">
+                  <div class="text-2xl mb-2">🥇</div>
+                  <div class="text-lg font-bold text-gray-900 dark:text-white">{{ bananaAnalytics()!.summary.mostPopularVariety }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">Most Popular</div>
+                </div>
+              </div>
+
+              <!-- Top Sales Countries -->
+              <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span>📊</span> Top Sales by Country
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  @for (sale of bananaAnalytics()!.sales.slice(0, 6); track sale.country) {
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/30 transition-colors">
+                      <div>
+                        <div class="font-semibold text-gray-900 dark:text-white">{{ sale.country }}</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">{{ formatNumber(sale.totalBunches) }} bunches</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="font-bold text-green-600 dark:text-green-400">{{ formatCurrency(sale.totalSales) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-500">{{ sale.marketShare.toFixed(1) }}% market</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Data Source Info -->
+              <div class="text-center text-sm text-gray-500 dark:text-gray-400">
+                <p>🧱 Data Source: {{ bananaAnalytics()!.dataSource }}</p>
+                <p class="mt-1">Generated at: {{ formatDateTime(bananaAnalytics()!.generatedAt) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
       <!-- Weather Section -->
       <section class="animate-slide-up">
         <div class="glass-card rounded-3xl p-8 mb-8">

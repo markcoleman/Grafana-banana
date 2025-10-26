@@ -8,6 +8,7 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using GrafanaBanana.Api.Security;
+using GrafanaBanana.Api.Databricks;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -36,9 +37,15 @@ try
     var activeRequestsGauge = meter.CreateUpDownCounter<long>("api_requests_active", description: "Number of active API requests");
     var requestDuration = meter.CreateHistogram<double>("api_request_duration_ms", unit: "ms", description: "API request duration in milliseconds");
     var weatherForecastCounter = meter.CreateCounter<long>("weather_forecast_requests", description: "Number of weather forecast requests");
+    var databricksQueryCounter = meter.CreateCounter<long>("databricks_queries_total", description: "Total number of Databricks queries");
+    var databricksQueryDuration = meter.CreateHistogram<double>("databricks_query_duration_ms", unit: "ms", description: "Databricks query duration in milliseconds");
 
     // Add services to the container.
     builder.Services.AddOpenApi();
+
+    // Add Databricks service
+    builder.Services.Configure<DatabricksSettings>(builder.Configuration.GetSection("Databricks"));
+    builder.Services.AddSingleton<IDatabricksService, DatabricksService>();
 
     // Add security services (rate limiting, input validation, etc.)
     builder.Services.AddSecurityServices(builder.Configuration);
@@ -268,6 +275,129 @@ try
     })
     .WithName("TestError")
     .WithOpenApi();
+
+    // Databricks Banana Analytics Endpoints
+    app.MapGet("/api/databricks/banana-analytics", async (
+        IDatabricksService databricksService,
+        ILogger<Program> logger) =>
+    {
+        var stopwatch = Stopwatch.StartNew();
+        activeRequestsGauge.Add(1);
+        requestCounter.Add(1, new KeyValuePair<string, object?>("endpoint", "/api/databricks/banana-analytics"));
+        databricksQueryCounter.Add(1, new KeyValuePair<string, object?>("query_type", "full_analytics"));
+
+        using var activity = Activity.Current;
+        activity?.SetTag("databricks.query_type", "full_analytics");
+        activity?.AddEvent(new ActivityEvent("Fetching banana analytics from Databricks"));
+
+        logger.LogInformation("Fetching banana analytics data from Databricks");
+
+        try
+        {
+            var analytics = await databricksService.GetBananaAnalyticsAsync();
+            
+            activity?.AddEvent(new ActivityEvent("Successfully retrieved banana analytics"));
+            logger.LogInformation(
+                "Retrieved banana analytics: {ProductionTons} tons produced, {Revenue} revenue, {Countries} countries served",
+                analytics.Summary.TotalProductionTons,
+                analytics.Summary.TotalRevenue,
+                analytics.Summary.CountriesServed);
+
+            return Results.Ok(analytics);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching banana analytics from Databricks");
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            return Results.Problem("Failed to fetch banana analytics");
+        }
+        finally
+        {
+            stopwatch.Stop();
+            activeRequestsGauge.Add(-1);
+            databricksQueryDuration.Record(stopwatch.ElapsedMilliseconds,
+                new KeyValuePair<string, object?>("query_type", "full_analytics"));
+            requestDuration.Record(stopwatch.ElapsedMilliseconds,
+                new KeyValuePair<string, object?>("endpoint", "/api/databricks/banana-analytics"));
+        }
+    })
+    .WithName("GetBananaAnalytics")
+    .WithOpenApi()
+    .RequireRateLimiting("api");
+
+    app.MapGet("/api/databricks/production/{year:int}", async (
+        int year,
+        IDatabricksService databricksService,
+        ILogger<Program> logger) =>
+    {
+        var stopwatch = Stopwatch.StartNew();
+        databricksQueryCounter.Add(1, new KeyValuePair<string, object?>("query_type", "production"));
+
+        using var activity = Activity.Current;
+        activity?.SetTag("databricks.query_type", "production");
+        activity?.SetTag("databricks.query_year", year);
+
+        logger.LogInformation("Fetching banana production data for year {Year}", year);
+
+        try
+        {
+            var production = await databricksService.GetProductionDataAsync(year);
+            logger.LogInformation("Retrieved {Count} production records for year {Year}", production.Count, year);
+            return Results.Ok(production);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching production data for year {Year}", year);
+            return Results.Problem($"Failed to fetch production data for year {year}");
+        }
+        finally
+        {
+            stopwatch.Stop();
+            databricksQueryDuration.Record(stopwatch.ElapsedMilliseconds,
+                new KeyValuePair<string, object?>("query_type", "production"));
+        }
+    })
+    .WithName("GetBananaProduction")
+    .WithOpenApi()
+    .RequireRateLimiting("api");
+
+    app.MapGet("/api/databricks/sales", async (
+        string? region,
+        IDatabricksService databricksService,
+        ILogger<Program> logger) =>
+    {
+        var stopwatch = Stopwatch.StartNew();
+        databricksQueryCounter.Add(1, new KeyValuePair<string, object?>("query_type", "sales"));
+
+        using var activity = Activity.Current;
+        activity?.SetTag("databricks.query_type", "sales");
+        activity?.SetTag("databricks.query_region", region ?? "all");
+
+        // Sanitize region parameter for logging to prevent log forging
+        var sanitizedRegion = (region ?? "all").Replace("\n", "").Replace("\r", "");
+        logger.LogInformation("Fetching banana sales data for region {Region}", sanitizedRegion);
+
+        try
+        {
+            var sales = await databricksService.GetSalesDataAsync(region ?? "Global");
+            logger.LogInformation("Retrieved {Count} sales records", sales.Count);
+            return Results.Ok(sales);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching sales data");
+            return Results.Problem("Failed to fetch sales data");
+        }
+        finally
+        {
+            stopwatch.Stop();
+            databricksQueryDuration.Record(stopwatch.ElapsedMilliseconds,
+                new KeyValuePair<string, object?>("query_type", "sales"));
+        }
+    })
+    .WithName("GetBananaSales")
+    .WithOpenApi()
+    .RequireRateLimiting("api");
 
     app.Run();
 }
