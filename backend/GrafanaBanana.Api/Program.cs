@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using GrafanaBanana.Api.Security;
 using GrafanaBanana.Api.Databricks;
+using GrafanaBanana.Api.Application;
+using GrafanaBanana.Api.Application.Queries;
+using MediatR;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -46,6 +49,9 @@ try
     // Add Databricks service
     builder.Services.Configure<DatabricksSettings>(builder.Configuration.GetSection("Databricks"));
     builder.Services.AddSingleton<IDatabricksService, DatabricksService>();
+
+    // Add Application Services (Clean Architecture, CQRS, Repository Pattern)
+    builder.Services.AddApplicationServices();
 
     // Add security services (rate limiting, input validation, etc.)
     builder.Services.AddSecurityServices(builder.Configuration);
@@ -173,12 +179,7 @@ try
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
 
-    var summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-    app.MapGet("/weatherforecast", (ILogger<Program> logger) =>
+    app.MapGet("/weatherforecast", async (IMediator mediator, ILogger<Program> logger) =>
     {
         var stopwatch = Stopwatch.StartNew();
         activeRequestsGauge.Add(1);
@@ -189,21 +190,15 @@ try
         activity?.SetTag("custom.endpoint", "weatherforecast");
         activity?.AddEvent(new ActivityEvent("Generating weather forecast"));
 
-        logger.LogInformation("Generating weather forecast data");
+        logger.LogInformation("Processing weather forecast request using CQRS pattern");
 
         try
         {
-            var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-                .ToArray();
+            // Use MediatR to dispatch query (CQRS pattern)
+            var forecast = await mediator.Send(new GetWeatherForecastQuery(Days: 5));
 
             activity?.AddEvent(new ActivityEvent("Weather forecast generated successfully"));
-            logger.LogInformation("Successfully generated {Count} weather forecast entries", forecast.Length);
+            logger.LogInformation("Successfully generated {Count} weather forecast entries", forecast.Count());
 
             return forecast;
         }
@@ -276,9 +271,9 @@ try
     .WithName("TestError")
     .WithOpenApi();
 
-    // Databricks Banana Analytics Endpoints
+    // Databricks Banana Analytics Endpoints (using CQRS pattern)
     app.MapGet("/api/databricks/banana-analytics", async (
-        IDatabricksService databricksService,
+        IMediator mediator,
         ILogger<Program> logger) =>
     {
         var stopwatch = Stopwatch.StartNew();
@@ -290,18 +285,14 @@ try
         activity?.SetTag("databricks.query_type", "full_analytics");
         activity?.AddEvent(new ActivityEvent("Fetching banana analytics from Databricks"));
 
-        logger.LogInformation("Fetching banana analytics data from Databricks");
+        logger.LogInformation("Processing banana analytics request using CQRS pattern");
 
         try
         {
-            var analytics = await databricksService.GetBananaAnalyticsAsync();
+            // Use MediatR to dispatch query (CQRS pattern)
+            var analytics = await mediator.Send(new GetBananaAnalyticsQuery());
             
             activity?.AddEvent(new ActivityEvent("Successfully retrieved banana analytics"));
-            logger.LogInformation(
-                "Retrieved banana analytics: {ProductionTons} tons produced, {Revenue} revenue, {Countries} countries served",
-                analytics.Summary.TotalProductionTons,
-                analytics.Summary.TotalRevenue,
-                analytics.Summary.CountriesServed);
 
             return Results.Ok(analytics);
         }
@@ -327,7 +318,7 @@ try
 
     app.MapGet("/api/databricks/production/{year:int}", async (
         int year,
-        IDatabricksService databricksService,
+        IMediator mediator,
         ILogger<Program> logger) =>
     {
         var stopwatch = Stopwatch.StartNew();
@@ -337,12 +328,12 @@ try
         activity?.SetTag("databricks.query_type", "production");
         activity?.SetTag("databricks.query_year", year);
 
-        logger.LogInformation("Fetching banana production data for year {Year}", year);
+        logger.LogInformation("Processing banana production request for year {Year} using CQRS pattern", year);
 
         try
         {
-            var production = await databricksService.GetProductionDataAsync(year);
-            logger.LogInformation("Retrieved {Count} production records for year {Year}", production.Count, year);
+            // Use MediatR to dispatch query (CQRS pattern)
+            var production = await mediator.Send(new GetBananaProductionQuery(year));
             return Results.Ok(production);
         }
         catch (Exception ex)
@@ -363,7 +354,7 @@ try
 
     app.MapGet("/api/databricks/sales", async (
         string? region,
-        IDatabricksService databricksService,
+        IMediator mediator,
         ILogger<Program> logger) =>
     {
         var stopwatch = Stopwatch.StartNew();
@@ -373,14 +364,12 @@ try
         activity?.SetTag("databricks.query_type", "sales");
         activity?.SetTag("databricks.query_region", region ?? "all");
 
-        // Sanitize region parameter for logging to prevent log forging
-        var sanitizedRegion = (region ?? "all").Replace("\n", "").Replace("\r", "");
-        logger.LogInformation("Fetching banana sales data for region {Region}", sanitizedRegion);
+        logger.LogInformation("Processing banana sales request using CQRS pattern");
 
         try
         {
-            var sales = await databricksService.GetSalesDataAsync(region ?? "Global");
-            logger.LogInformation("Retrieved {Count} sales records", sales.Count);
+            // Use MediatR to dispatch query (CQRS pattern)
+            var sales = await mediator.Send(new GetBananaSalesQuery(region ?? "Global"));
             return Results.Ok(sales);
         }
         catch (Exception ex)
@@ -408,10 +397,5 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
-}
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC * 9.0 / 5.0);
 }
 

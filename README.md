@@ -2,7 +2,13 @@
 
 A full-stack web application with .NET Web API backend and Angular frontend, featuring comprehensive observability with Grafana, Prometheus, Tempo, and Loki, plus fun Databricks integration for banana analytics! 🍌
 
+Built using enterprise architecture patterns including Clean Architecture, CQRS, and Repository Pattern for maintainability and scalability.
+
 > **🚀 [Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes!
+> 
+> **🏛️ [Enterprise Architecture Patterns](docs/ENTERPRISE_ARCHITECTURE_PATTERNS.md)** - Clean Architecture, CQRS, Repository Pattern
+> 
+> **📊 [Architecture Visual Guide](docs/ARCHITECTURE_VISUAL_GUIDE.md)** - Diagrams and visual documentation
 > 
 > **🍌 [Databricks Integration](docs/DATABRICKS_INTEGRATION.md)** - Banana analytics powered by Databricks
 > 
