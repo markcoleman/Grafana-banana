@@ -112,7 +112,7 @@ jobs:
     
     - name: Build and push Backend API image
       id: backend-build
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./backend/GrafanaBanana.Api
         file: ./backend/GrafanaBanana.Api/Dockerfile
@@ -126,7 +126,7 @@ jobs:
     
     - name: Build and push Frontend image
       id: frontend-build
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./frontend
         file: ./frontend/Dockerfile
