@@ -48,7 +48,7 @@ jobs:
         echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
     
     - name: Build Backend API image (test only)
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./backend/GrafanaBanana.Api
         file: ./backend/GrafanaBanana.Api/Dockerfile
@@ -60,7 +60,7 @@ jobs:
         load: true
     
     - name: Build Frontend image (test only)
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./frontend
         file: ./frontend/Dockerfile
